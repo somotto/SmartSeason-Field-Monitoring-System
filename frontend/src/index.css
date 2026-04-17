@@ -1,0 +1,63 @@
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --green-dark: #0d2b1a;
+  --green-mid: #1a4a2e;
+  --green-base: #2d6a4f;
+  --green-light: #52b788;
+  --green-pale: #b7e4c7;
+  --green-mist: #d8f3dc;
+
+  --amber: #f4a261;
+  --amber-dark: #e76f51;
+  --sky: #74c0fc;
+
+  --text-primary: #0d1f12;
+  --text-secondary: #3a5a40;
+  --text-muted: #74956e;
+
+  --surface: #f8fef9;
+  --surface-2: #edf7f0;
+  --surface-3: #e0f0e5;
+  --border: #c4dfc9;
+
+  --white: #ffffff;
+  --shadow-sm: 0 1px 3px rgba(13,43,26,0.08);
+  --shadow-md: 0 4px 16px rgba(13,43,26,0.10);
+  --shadow-lg: 0 8px 32px rgba(13,43,26,0.13);
+
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 22px;
+
+  --font-display: 'Syne', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+}
+
+html, body, #root {
+  height: 100%;
+  background: var(--surface);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 { font-family: var(--font-display); font-weight: 700; line-height: 1.2; }
+
+a { color: inherit; text-decoration: none; }
+
+button { cursor: pointer; font-family: var(--font-body); }
+
+input, select, textarea {
+  font-family: var(--font-body);
+  font-size: 14px;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--surface-2); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
