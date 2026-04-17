@@ -75,11 +75,17 @@ const runMigrations = async () => {
 };
 
 const start = async () => {
-  await runMigrations();
-  await runSeed();
+  // Start server first so Render health checks pass
   app.listen(PORT, () => {
     console.log(`🚀 SmartSeason API running on port ${PORT}`);
   });
+  // Then run DB setup in background
+  try {
+    await runMigrations();
+    await runSeed();
+  } catch (err) {
+    console.error('❌ Startup DB error:', err.message);
+  }
 };
 
 const runSeed = async () => {
