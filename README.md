@@ -2,17 +2,19 @@
 
 A full-stack web application for tracking crop progress across multiple fields during a growing season.
 
+**GitHub:** https://github.com/somotto/SmartSeason-Field-Monitoring-System
+
 ---
 
 ## Tech Stack
 
-| Layer    | Technology              |
-|----------|------------------------|
-| Backend  | Node.js + Express       |
-| Frontend | React (CRA)             |
-| Database | PostgreSQL               |
-| Auth     | JWT (jsonwebtoken)      |
-| Styling  | Vanilla CSS-in-JS       |
+| Layer    | Technology          |
+|----------|---------------------|
+| Backend  | Node.js + Express   |
+| Frontend | React (CRA)         |
+| Database | PostgreSQL           |
+| Auth     | JWT (jsonwebtoken)  |
+| Styling  | Vanilla CSS-in-JS   |
 
 ---
 
@@ -20,15 +22,15 @@ A full-stack web application for tracking crop progress across multiple fields d
 
 ### Prerequisites
 - Node.js 18+
-- PostgreSQL 14+ running locally (or a connection string)
+- PostgreSQL 14+ running locally
 
 ---
 
 ### 1. Clone the repo
 
 ```bash
-git clone https://github.com/your-username/smartseason.git
-cd smartseason
+git clone https://github.com/somotto/SmartSeason-Field-Monitoring-System.git
+cd SmartSeason-Field-Monitoring-System
 ```
 
 ---
@@ -49,11 +51,13 @@ DATABASE_URL=postgresql://postgres:yourpassword@localhost:5432/smartseason
 JWT_SECRET=change_this_to_something_long_and_random
 JWT_EXPIRES_IN=7d
 NODE_ENV=development
+FRONTEND_URL=http://localhost:3000
 ```
 
-Create the database:
+Create the database (Linux/macOS):
 ```bash
-psql -U postgres -c "CREATE DATABASE smartseason;"
+sudo -u postgres psql -c "CREATE DATABASE smartseason;"
+sudo -u postgres psql -c "ALTER USER postgres PASSWORD 'yourpassword';"
 ```
 
 Run migrations + seed:
@@ -96,37 +100,37 @@ Frontend runs at: `http://localhost:3000`
 
 ## Demo Credentials
 
-| Role  | Email                      | Password   |
-|-------|---------------------------|------------|
-| Admin | admin@smartseason.com      | admin123   |
-| Agent | james@smartseason.com      | agent123   |
-| Agent | aisha@smartseason.com      | agent123   |
+| Role  | Email                     | Password  |
+|-------|---------------------------|-----------|
+| Admin | admin@smartseason.com     | admin123  |
+| Agent | james@smartseason.com     | agent123  |
+| Agent | aisha@smartseason.com     | agent123  |
 
 ---
 
 ## API Endpoints
 
 ### Auth
-| Method | Endpoint        | Description        |
-|--------|-----------------|--------------------|
-| POST   | /api/auth/login | Login → JWT token  |
-| GET    | /api/auth/me    | Get current user   |
+| Method | Endpoint         | Description       |
+|--------|------------------|-------------------|
+| POST   | /api/auth/login  | Login → JWT token |
+| GET    | /api/auth/me     | Get current user  |
 
 ### Fields
-| Method | Endpoint            | Access         | Description                |
-|--------|---------------------|----------------|---------------------------|
-| GET    | /api/fields         | All            | List fields (role-filtered)|
-| GET    | /api/fields/stats   | All            | Dashboard summary stats    |
-| GET    | /api/fields/:id     | All            | Field detail + history     |
-| POST   | /api/fields         | Admin only     | Create field               |
-| PUT    | /api/fields/:id     | All            | Update field (role-scoped) |
-| DELETE | /api/fields/:id     | Admin only     | Delete field               |
+| Method | Endpoint           | Access      | Description                 |
+|--------|--------------------|-------------|-----------------------------|
+| GET    | /api/fields        | All         | List fields (role-filtered) |
+| GET    | /api/fields/stats  | All         | Dashboard summary stats     |
+| GET    | /api/fields/:id    | All         | Field detail + history      |
+| POST   | /api/fields        | Admin only  | Create field                |
+| PUT    | /api/fields/:id    | All         | Update field (role-scoped)  |
+| DELETE | /api/fields/:id    | Admin only  | Delete field                |
 
 ### Users
-| Method | Endpoint            | Access     | Description        |
-|--------|---------------------|------------|--------------------|
-| GET    | /api/users/agents   | Admin only | List all agents    |
-| POST   | /api/users          | Admin only | Create agent       |
+| Method | Endpoint          | Access      | Description      |
+|--------|-------------------|-------------|------------------|
+| GET    | /api/users/agents | Admin only  | List all agents  |
+| POST   | /api/users        | Admin only  | Create agent     |
 
 ---
 
@@ -136,13 +140,13 @@ Status is **computed at query time** from the field's data — it is never store
 
 **Rules (`backend/src/models/fieldStatus.js`):**
 
-| Condition                                               | Status      |
-|---------------------------------------------------------|-------------|
-| `current_stage === 'harvested'`                         | `completed` |
-| `stage === 'ready'` and planted 180+ days ago           | `at_risk`   |
-| `stage === 'growing'` and planted 120+ days ago         | `at_risk`   |
-| `stage === 'planted'` and planted 30+ days ago          | `at_risk`   |
-| Everything else                                         | `active`    |
+| Condition                                            | Status      |
+|------------------------------------------------------|-------------|
+| `current_stage === 'harvested'`                      | `completed` |
+| `stage === 'ready'` and planted 180+ days ago        | `at_risk`   |
+| `stage === 'growing'` and planted 120+ days ago      | `at_risk`   |
+| `stage === 'planted'` and planted 30+ days ago       | `at_risk`   |
+| Everything else                                      | `active`    |
 
 The reasoning: a field stuck in an early stage beyond expected timelines likely has a problem (pest, drought, delayed management) and should draw attention.
 
@@ -176,7 +180,7 @@ Status is derived from data, not persisted, ensuring it is always current and co
 ## Project Structure
 
 ```
-smartseason/
+SmartSeason-Field-Monitoring-System/
 ├── backend/
 │   ├── src/
 │   │   ├── index.js
@@ -226,5 +230,3 @@ smartseason/
 - Agents can update the stage to any value (including going backwards) — intentional, as field conditions may warrant this.
 - Area and location are optional fields.
 - The frontend proxies API calls via the `proxy` field in `package.json` in development.
-
----
