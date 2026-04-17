@@ -208,4 +208,25 @@ const getStats = async (req, res) => {
   }
 };
 
-module.exports = { getFields, getField, createField, updateField, deleteField, getStats };
+// GET /fields/notes — admin sees all notes from agents
+const getNotes = async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT fu.id, fu.notes, fu.new_stage, fu.previous_stage, fu.created_at,
+             u.name AS agent_name,
+             f.name AS field_name, f.id AS field_id
+      FROM field_updates fu
+      JOIN users u ON fu.agent_id = u.id
+      JOIN fields f ON fu.field_id = f.id
+      WHERE fu.notes IS NOT NULL AND fu.notes != ''
+      ORDER BY fu.created_at DESC
+      LIMIT 20
+    `);
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
+module.exports = { getFields, getField, createField, updateField, deleteField, getStats, getNotes };
