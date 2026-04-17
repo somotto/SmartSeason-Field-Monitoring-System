@@ -152,18 +152,25 @@ export default function FieldDetail() {
               </div>
 
               <div style={styles.formField}>
-                <label style={styles.label}>Notes / Observations</label>
+                <label style={styles.label}>
+                  {isAgent ? '💬 Notes / Message to Admin' : 'Notes / Observations'}
+                </label>
                 <textarea
                   style={styles.textarea}
                   rows={4}
-                  placeholder="Describe current field conditions, observations, or issues…"
+                  placeholder={isAgent
+                    ? 'Describe field conditions, flag an issue, or leave a message for the admin…'
+                    : 'Describe current field conditions, observations, or issues…'}
                   value={form.notes}
                   onChange={e => setForm(p => ({ ...p, notes: e.target.value }))}
                 />
+                {isAgent && (
+                  <span style={styles.noteHint}>Your note will be saved and visible to the admin.</span>
+                )}
               </div>
 
               <button style={{ ...styles.submitBtn, opacity: updating ? 0.7 : 1 }} type="submit" disabled={updating}>
-                {updating ? 'Saving…' : 'Save Update'}
+                {updating ? 'Saving…' : isAgent ? 'Save & Notify Admin' : 'Save Update'}
               </button>
             </form>
           </div>
@@ -220,4 +227,5 @@ const styles = {
   },
   successMsg: { background: '#d8f3dc', color: '#1b4332', padding: '10px 14px', borderRadius: 8, fontSize: 14, marginBottom: 16 },
   errorMsg: { background: '#fff0ee', color: '#c44c00', padding: '10px 14px', borderRadius: 8, fontSize: 14, marginBottom: 16 },
+  noteHint: { fontSize: 12, color: '#74956e', marginTop: 4 },
 };
