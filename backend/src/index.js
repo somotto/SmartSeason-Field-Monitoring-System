@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const bcrypt = require('bcryptjs');
 const routes = require('./routes');
 const pool = require('./config/db');
 
@@ -75,9 +76,59 @@ const runMigrations = async () => {
 
 const start = async () => {
   await runMigrations();
+  await runSeed();
   app.listen(PORT, () => {
     console.log(`🚀 SmartSeason API running on port ${PORT}`);
   });
+};
+
+const runSeed = async () => {
+  const client = await pool.connect();
+  try {
+    const { rows } = await client.query(`SELECT id FROM users WHERE email = 'admin@smartseason.com'`);
+    if (rows.length > 0) return; // already seeded
+
+    const adminPass = await bcrypt.hash('admin123', 10);
+    const agentPass = await bcrypt.hash('agent123', 10);
+
+    const adminResult = await client.query(`
+      INSERT INTO users (name, email, password, role)
+      VALUES ('Admin Coordinator', 'admin@smartseason.com', $1, 'admin')
+      RETURNING id;
+    `, [adminPass]);
+
+    const agent1 = await client.query(`
+      INSERT INTO users (name, email, password, role)
+      VALUES ('James Mwangi', 'james@smartseason.com', $1, 'agent')
+      RETURNING id;
+    `, [agentPass]);
+
+    const agent2 = await client.query(`
+      INSERT INTO users (name, email, password, role)
+      VALUES ('Aisha Kamau', 'aisha@smartseason.com', $1, 'agent')
+      RETURNING id;
+    `, [agentPass]);
+
+    const adminId = adminResult.rows[0].id;
+    const agentId1 = agent1.rows[0].id;
+    const agentId2 = agent2.rows[0].id;
+
+    await client.query(`
+      INSERT INTO fields (name, crop_type, planting_date, current_stage, location, area_hectares, assigned_agent_id, created_by)
+      VALUES
+        ('North Block A', 'Maize', '2024-09-01', 'growing', 'Nakuru North', 5.5, $1, $3),
+        ('South Block B', 'Wheat', '2024-08-15', 'ready', 'Nakuru South', 3.2, $1, $3),
+        ('East Paddock', 'Beans', '2024-10-01', 'planted', 'Eldoret East', 2.0, $2, $3),
+        ('West Field C', 'Sunflower', '2024-07-20', 'harvested', 'Kisumu West', 7.8, $2, $3),
+        ('Central Plot', 'Sorghum', '2024-09-15', 'growing', 'Nairobi Central', 4.1, $1, $3)
+    `, [agentId1, agentId2, adminId]);
+
+    console.log('✅ Seed complete — admin@smartseason.com / admin123');
+  } catch (err) {
+    console.error('❌ Seed error:', err.message);
+  } finally {
+    client.release();
+  }
 };
 
 start();
