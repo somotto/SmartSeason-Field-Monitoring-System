@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { login, getMe } = require('../controllers/authController');
-const { getFields, getField, createField, updateField, deleteField, getStats } = require('../controllers/fieldsController');
+const { getFields, getField, createField, updateField, deleteField, getStats, getNotes } = require('../controllers/fieldsController');
 const { getAgents, createUser } = require('../controllers/usersController');
 const { authenticate, requireAdmin } = require('../middleware/auth');
 
@@ -11,6 +11,7 @@ router.get('/auth/me', authenticate, getMe);
 
 // Fields
 router.get('/fields/stats', authenticate, getStats);
+router.get('/fields/notes', authenticate, requireAdmin, getNotes);
 router.get('/fields', authenticate, getFields);
 router.get('/fields/:id', authenticate, getField);
 router.post('/fields', authenticate, requireAdmin, createField);
