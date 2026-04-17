@@ -8,18 +8,23 @@ export default function Dashboard() {
   const { user } = useAuth();
   const [stats, setStats] = useState(null);
   const [fields, setFields] = useState([]);
+  const [notes, setNotes] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    Promise.all([api.get('/fields/stats'), api.get('/fields')])
-      .then(([statsRes, fieldsRes]) => {
+    Promise.all([api.get('/fields/stats'), api.get('/fields'), api.get('/fields/notes')])
+      .then(([statsRes, fieldsRes, notesRes]) => {
         setStats(statsRes.data);
         setFields(fieldsRes.data);
+        setNotes(notesRes.data);
       })
       .finally(() => setLoading(false));
   }, []);
 
   if (loading) return <div style={styles.loading}>Loading dashboard…</div>;
+
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
 
   const atRiskFields = fields.filter(f => f.status === 'at_risk');
   const readyFields = fields.filter(f => f.current_stage === 'ready');
@@ -28,7 +33,7 @@ export default function Dashboard() {
     <div>
       <div style={styles.header}>
         <div>
-          <h1 style={styles.title}>Good morning, {user?.name?.split(' ')[0]} 👋</h1>
+          <h1 style={styles.title}>{greeting}, {user?.name?.split(' ')[0]} 👋</h1>
           <p style={styles.sub}>Here's what's happening across your fields today.</p>
         </div>
         {user?.role === 'admin' && (
@@ -90,6 +95,31 @@ export default function Dashboard() {
             </Link>
           ))}
         </div>
+      </div>
+
+      {/* Agent Notes */}
+      <div style={{ ...styles.panel, marginTop: 28 }}>
+        <h2 style={styles.panelTitle}>💬 Agent Notes</h2>
+        {notes.length === 0 ? (
+          <p style={styles.empty}>No notes from agents yet.</p>
+        ) : notes.map(n => (
+          <Link to={`/fields/${n.field_id}`} key={n.id} style={styles.noteRow}>
+            <div style={styles.noteLeft}>
+              <div style={styles.noteAvatar}>{n.agent_name?.[0]?.toUpperCase()}</div>
+              <div>
+                <div style={styles.noteMeta}>
+                  <span style={styles.noteAgent}>{n.agent_name}</span>
+                  <span style={styles.noteSep}>·</span>
+                  <span style={styles.noteField}>{n.field_name}</span>
+                </div>
+                <p style={styles.noteText}>{n.notes}</p>
+              </div>
+            </div>
+            <span style={styles.noteDate}>
+              {new Date(n.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+            </span>
+          </Link>
+        ))}
       </div>
 
       {/* Recent fields table */}
@@ -173,6 +203,23 @@ const styles = {
   },
   fieldName: { fontWeight: 600, fontSize: 14, marginBottom: 2 },
   fieldMeta: { fontSize: 12, color: '#74956e' },
+  noteRow: {
+    display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start',
+    padding: '14px 0', borderBottom: '1px solid #edf7f0',
+    textDecoration: 'none', color: 'inherit',
+  },
+  noteLeft: { display: 'flex', gap: 12, alignItems: 'flex-start' },
+  noteAvatar: {
+    width: 32, height: 32, borderRadius: '50%', background: '#d8f3dc',
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+    fontFamily: 'Syne, sans-serif', fontWeight: 700, color: '#1b4332', fontSize: 13, flexShrink: 0,
+  },
+  noteMeta: { display: 'flex', gap: 6, alignItems: 'center', marginBottom: 4 },
+  noteAgent: { fontWeight: 600, fontSize: 13, color: '#0d2b1a' },
+  noteSep: { color: '#c4dfc9' },
+  noteField: { fontSize: 13, color: '#52b788', fontWeight: 500 },
+  noteText: { fontSize: 13, color: '#3a5a40', lineHeight: 1.5 },
+  noteDate: { fontSize: 12, color: '#74956e', flexShrink: 0, marginLeft: 16, marginTop: 2 },
   table: { width: '100%', borderCollapse: 'collapse' },
   thead: { background: '#f0f7f2' },
   th: { padding: '10px 14px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: '#3a5a40', textTransform: 'uppercase', letterSpacing: '0.4px' },
